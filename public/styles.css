@@ -85,6 +85,16 @@ input, textarea { font-family: inherit; }
   80% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1); }
 }
+/* 계속 남는 강조 박스: 깜빡인 뒤 그대로 유지 */
+.slide.play .pulse.stay { animation: aPulseStay 1.6s ease-out var(--d, 1.2s) forwards; }
+@keyframes aPulseStay {
+  0% { opacity: 0; transform: scale(1.25); }
+  30% { opacity: 1; transform: scale(1); }
+  45% { opacity: .35; }
+  60% { opacity: 1; }
+  75% { opacity: .35; }
+  100% { opacity: 1; transform: scale(1); }
+}
 /* 형광펜 밑줄 */
 .mark { background: linear-gradient(transparent 62%, rgba(255, 214, 79, .65) 62%) no-repeat; background-size: 0 100%; }
 .slide.play .mark { animation: aMark .9s ease-out var(--d, 1s) forwards; }

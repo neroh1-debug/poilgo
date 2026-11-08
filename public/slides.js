@@ -1,6 +1,7 @@
 // 40장 슬라이드 정의 (1440×810 캔버스 기준 좌표)
 // 애니메이션: class="a up|left|right|zoom|pop|fade|wipe|wipe-d|kb", style="--d:지연(s)"
 (function () {
+  const V = '2'; // 이미지를 바꾸면 이 숫자를 올려 휴대폰 캐시를 갱신
   const SEC = {
     1: '01 성취평가와 추정분할에 대한 이해',
     1.5: '01 성취평가와 추정분할에 대한 오해',
@@ -12,18 +13,18 @@
   const H = (k) => `<div class="hdr">${SEC[k]}</div><div class="bar"></div>`;
   const T = (text, top = 196, d = 0.1) => `<h2 class="ttl a left" style="top:${top}px;--d:${d}s">${text}</h2>`;
   const IMG = (name, x, y, w, h, anim = 'up', d = 0.4, extra = '') =>
-    `<img class="shot a ${anim}" src="/img/${name}.webp" alt="" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;--d:${d}s;${extra}">`;
-  const FULL = (name, anim = 'kb') => `<img class="full a ${anim}" src="/img/${name}.webp" alt="" style="--d:0s">`;
+    `<img class="shot a ${anim}" src="/img/${name}.webp?v=${V}" alt="" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;--d:${d}s;${extra}">`;
+  const FULL = (name, anim = 'kb') => `<img class="full a ${anim}" src="/img/${name}.webp?v=${V}" alt="" style="--d:0s">`;
   const RING = (x, y, w, h, d = 1.3, r = 18) =>
     `<div class="pulse" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;--d:${d}s;border-radius:${r}px"></div>`;
-  const LOGO = (x = 95, y = 95) => `<img class="quiz-logo a down" src="/img/quiz.webp" alt="QUIZ" style="left:${x}px;top:${y}px;--d:0s">`;
+  const LOGO = (x = 95, y = 95) => `<img class="quiz-logo a down" src="/img/quiz.webp?v=${V}" alt="QUIZ" style="left:${x}px;top:${y}px;--d:0s">`;
   const TOTAL = (n) => `<div class="resp-total a fade" style="--d:.6s"><span data-total="${n}">0</span>명 참여</div>`;
   const STMT = (l1, l2, top = 305) =>
     `<p class="big abs a up" style="left:0;right:0;top:${top}px;font-size:54px;line-height:88px;--d:.35s">${l1}<br>${l2}</p>`;
   const OX = (n) => `
     <div class="ox-wrap a up" style="--d:.8s" data-ox="${n}">
-      <button class="ox-card O" data-v="O"><img src="/img/o.webp" alt="O"><span class="ox-badge">0</span></button>
-      <button class="ox-card X" data-v="X"><img src="/img/x.webp" alt="X"><span class="ox-badge">0</span></button>
+      <button class="ox-card O" data-v="O"><img src="/img/o.webp?v=${V}" alt="O"><span class="ox-badge">0</span></button>
+      <button class="ox-card X" data-v="X"><img src="/img/x.webp?v=${V}" alt="X"><span class="ox-badge">0</span></button>
     </div>${TOTAL(n)}`;
   const BUL = (top, l1, l2, d) =>
     `<p class="bul a left" style="top:${top}px;--d:${d}s">- ${l1}<span class="ind">${l2}</span></p>`;
@@ -99,9 +100,9 @@
       <span class="a left" style="display:inline-block;color:var(--blue);--d:.8s">등급위주 →</span>
       <span class="a pop" style="display:inline-block;color:var(--navy);font-size:70px;text-decoration:underline;text-underline-offset:10px;text-decoration-thickness:5px;--d:1.4s">등급+성취도</span></p>`);
   // 12-14 대학별
-  add(`${FULL('p12')}${RING(326, 264, 200, 145, 1.2, 50)}`);
-  add(`${FULL('p13')}${RING(315, 357, 248, 179, 1.2, 50)}`);
-  add(`${FULL('p14')}${RING(912, 333, 162, 196, 1.2, 14)}`);
+  add(`${FULL('p12')}`);
+  add(`${FULL('p13')}`);
+  add(`${FULL('p14')}`);
 
   // 15 성취도별 분포비율 (막대그래프 재구성)
   const vals = [28.2, 26.3, 24.4, 14.9, 6.1];
@@ -120,7 +121,7 @@
     <p class="abs a fade" style="left:600px;top:262px;margin:0;font-size:23px;font-weight:700;--d:.4s">(학교알리미)</p>
     ${IMG('p16', 70, 300, 577, 510, 'wipe-d', 0.5)}`);
   // 17
-  add(`${H(2)}${T('자세히 들여다볼까요?', 183)}${IMG('p17', 70, 307, 1294, 330, 'zoom', 0.4)}${RING(1058, 486, 150, 128, 1.4, 14)}`);
+  add(`${H(2)}${T('자세히 들여다볼까요?', 183)}${IMG('p17', 70, 307, 1294, 330, 'zoom', 0.4)}<div class="pulse stay" style="left:612px;top:486px;width:150px;height:128px;--d:1.2s;border-radius:14px"></div>`);
   // 18
   add(`${H(2)}<p class="big abs a zoom" style="left:0;right:0;top:380px;font-size:60px;--d:.3s">성취도가 이렇게 중요해졌습니다.</p>`);
   // 19 분할점수란?
@@ -130,8 +131,8 @@
   // 20
   add(`${H(3)}${T('고정분할점수 vs. 추정분할점수')}${IMG('p20a', 45, 297, 667, 444, 'left', 0.4)}${IMG('p20b', 712, 297, 665, 444, 'right', 1.0)}`);
   // 21
-  add(`${H(2)}${IMG('p21', 229, 180, 1018, 572, 'zoom', 0.3)}
-    <p class="abs a left" style="left:50px;top:152px;margin:0;font-size:48px;font-weight:800;--d:.1s">고정분할시</p>`);
+  add(`${H(2)}${IMG('p21', 229, 215, 1018, 572, 'zoom', 0.3)}
+    <p class="abs a left" style="left:50px;top:142px;margin:0;font-size:48px;font-weight:800;--d:.1s">고정분할시</p>`);
 
   // 22 OX
   add(`${LOGO()}${STMT('수행평가는 고정분할로,', '정기시험은 추정분할로 할 수 있다.')}${OX(22)}`,
