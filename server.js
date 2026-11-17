@@ -26,13 +26,22 @@ const INTERACTIONS = {
   32: { type: 'number' },
 };
 
+// 퀴즈 정답 (발표자가 '정답 확인'을 누르기 전에는 참여자에게 보내지 않음)
+const ANSWERS = {
+  22: 'X',
+  25: ['난이도', '배점', '(예상)정답률'],
+  27: 'X',
+  31: 'X',
+  32: 2,
+};
+
 // ---------- 상태 ----------
 let state = {
   slide: 1,
   responses: {},   // { [slide]: { [clientId]: value | value[] } }
   questions: [],   // { id, text, name, ts, done }
   spotlight: null, // 화면에 띄운 질문 id
-  reveal: {},      // { [slide]: 'O' | 'X' }  OX 정답 공개
+  reveal: {},      // { [slide]: true }  정답 공개 여부
   tokens: [],      // 발표자 인증 토큰 (서버 재시작 후에도 유지)
 };
 try {
@@ -54,6 +63,12 @@ const tokens = new Set(state.tokens || []);
 const norm = (s) => s.replace(/\s+/g, '').toLowerCase();
 
 function aggregate(slide) {
+  const r0 = aggregateRaw(slide);
+  r0.answer = state.reveal[slide] && slide in ANSWERS ? ANSWERS[slide] : null;
+  return r0;
+}
+
+function aggregateRaw(slide) {
   const cfg = INTERACTIONS[slide];
   const r = state.responses[slide] || {};
   const people = Object.keys(r).length;
@@ -65,7 +80,7 @@ function aggregate(slide) {
   if (cfg.type === 'ox') {
     const c = { O: 0, X: 0 };
     for (const v of Object.values(r)) if (v in c) c[v]++;
-    return { type: 'ox', O: c.O, X: c.X, total: people, reveal: state.reveal[slide] || null };
+    return { type: 'ox', O: c.O, X: c.X, total: people };
   }
   if (cfg.type === 'number') {
     // 응답 하나하나를 제출 순서대로
@@ -228,6 +243,7 @@ const server = http.createServer(async (req, res) => {
       const cid = cleanText(body.clientId, 64);
       if (!cfg || !cid) return json(res, 400, { error: 'bad request' });
       if (slide !== state.slide) return json(res, 409, { error: '지금은 응답할 수 없는 화면이에요.' });
+      if (state.reveal[slide]) return json(res, 409, { error: '정답이 공개되어 응답이 마감되었어요.' });
       const bucket = (state.responses[slide] = state.responses[slide] || {});
       const v = body.value;
       if (cfg.type === 'choice') {
@@ -273,7 +289,7 @@ const server = http.createServer(async (req, res) => {
       delete state.reveal[Number(body.slide)];
     } else if (action === 'reveal') {
       const s = Number(body.slide);
-      if (body.value === 'O' || body.value === 'X') state.reveal[s] = body.value; else delete state.reveal[s];
+      if (body.on && s in ANSWERS) state.reveal[s] = true; else delete state.reveal[s];
     } else if (action === 'qdone') {
       const q = state.questions.find((x) => x.id === body.id);
       if (q) q.done = !q.done;

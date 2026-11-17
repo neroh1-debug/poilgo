@@ -64,6 +64,7 @@
     $('#pg').textContent = `${n} / ${N}`;
     $('#audPg').textContent = `${n} / ${N}`;
     $('#resetBtn').classList.toggle('hidden', !SLIDES[n - 1].interact);
+    updateAnsBtn();
     if (!isPresenter) renderPanel();
     // 다음 슬라이드 이미지 미리 불러오기
     [n + 1, n + 2].forEach((k) => k <= N && $$('img', slideEl(k)).forEach((im) => { const p = new Image(); p.src = im.src; }));
@@ -108,11 +109,24 @@
         b.textContent = r[k];
         b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
       }
-      $(`.ox-card.${k}`, wrap).classList.toggle('answer', r.reveal === k);
+      $(`.ox-card.${k}`, wrap).classList.toggle('answer', r.answer === k);
     });
-    wrap.classList.toggle('revealed', !!r.reveal);
+    wrap.classList.toggle('revealed', !!r.answer);
   }
   function renderNumbers(el, r) {
+    const blank = $('.blank', el);
+    const ansText = r.answer == null ? '' : String(r.answer);
+    if (blank.textContent !== ansText) {
+      blank.textContent = ansText;
+      blank.classList.toggle('filled', !!ansText);
+    }
+    renderNumberChips(el, r);
+    $$('.num-chip', el).forEach((c) => {
+      c.classList.toggle('hit', r.answer != null && Number(c.textContent) === Number(r.answer));
+      c.classList.toggle('miss', r.answer != null && Number(c.textContent) !== Number(r.answer));
+    });
+  }
+  function renderNumberChips(el, r) {
     const area = $('.num-area', el);
     const chips = $$('.num-chip', area);
     const same = chips.length <= r.list.length && chips.every((c, i) => c.textContent === String(r.list[i]));
@@ -151,8 +165,25 @@
     }
     $$('.w', cloud).forEach((nd) => { if (!keep.has(nd.dataset.k)) nd.remove(); });
   }
+  const loose = (t) => String(t).replace(/[\s()（）·,.]/g, '').toLowerCase();
+  const matchesAnswer = (text, answers) => answers.some((a) => {
+    const x = loose(text), y = loose(a);
+    return x && y && (x.includes(y) || y.includes(x));
+  });
   function renderTop3(el, r) {
     $$('.top3', el).forEach((box, i) => {
+      if (r.answer) {
+        const a = r.answer[i];
+        if (box.dataset.text === 'ans:' + a) return;
+        box.innerHTML = '';
+        const t = document.createElement('div'); t.className = 't'; t.textContent = a;
+        const c = document.createElement('div'); c.className = 'c ok'; c.textContent = '정답';
+        box.append(t, c);
+        box.classList.remove('new'); void box.offsetWidth; box.classList.add('new', 'ans');
+        box.dataset.text = 'ans:' + a;
+        return;
+      }
+      box.classList.remove('ans');
       const w = r.words[i];
       const prevText = box.dataset.text || '';
       if (!w) { box.innerHTML = '<div class="q">?</div>'; box.dataset.text = ''; return; }
@@ -169,6 +200,7 @@
       const li = document.createElement('li');
       const a = document.createElement('span'); a.textContent = `${i + 1}. ${w.text}`;
       const b = document.createElement('b'); b.textContent = w.count;
+      if (r.answer && matchesAnswer(w.text, r.answer)) li.className = 'hit';
       li.append(a, b); ol.appendChild(li);
     });
   }
@@ -211,14 +243,17 @@
       // 발표자가 응답을 초기화한 경우 내 기록도 비움
       for (const [n, r] of Object.entries(s.results)) if (r.total === 0 && mine[n]) { delete mine[n]; saveMine(); }
       const slideChanged = !last || last.slide !== s.slide;
+      const ansKey = (x) => JSON.stringify(x && x.results[x.slide] && x.results[x.slide].answer);
+      const answerChanged = !slideChanged && ansKey(last) !== ansKey(s);
       last = s;
       if (s.slide !== cur) show(s.slide);
       renderResults(s.results);
       renderSpot(s.spotlight);
+      updateAnsBtn();
       if (isPresenter) {
         $("#ppl").textContent = `참여자 ${s.clients}명 접속`;
-      } else if (!slideChanged) {
-        refreshPanelCounts();
+      } else if (answerChanged) {
+        renderPanel();
       }
     });
     es.addEventListener('questions', (e) => {
@@ -247,6 +282,8 @@
       return;
     }
     const n = String(cur);
+    const res = last && last.results[n];
+    if (res && res.answer != null) return renderAnswerPanel(panel, cfg, n, res.answer);
     const head = (sub) => `<h4></h4><p class="sub">${sub}</p>`;
     if (cfg.type === 'choice') {
       panel.innerHTML = head('하나를 선택해 주세요. 다시 눌러 바꿀 수 있어요.') + cfg.options.map((o, i) =>
@@ -310,6 +347,30 @@
       void list;
     }
     $('h4', panel).textContent = cfg.title;
+  }
+
+  // 정답 공개 후 참여자 화면
+  function renderAnswerPanel(panel, cfg, n, answer) {
+    panel.classList.add('answered');
+    panel.innerHTML = '<h4></h4><div class="ans-box"><div class="ans-k">정답</div><div class="ans-v"></div></div><div class="ans-me"></div>';
+    $('h4', panel).textContent = cfg.title;
+    const v = $('.ans-v', panel);
+    const me = $('.ans-me', panel);
+    const my = mine[n];
+    if (Array.isArray(answer)) {
+      answer.forEach((a, i) => {
+        const sp = document.createElement('span');
+        const b = document.createElement('b'); b.textContent = `0${i + 1}`;
+        sp.append(b, ' ' + a);
+        v.appendChild(sp);
+      });
+      const hits = (my || []).filter((w) => matchesAnswer(w, answer)).length;
+      me.textContent = my && my.length ? `내가 보낸 단어 중 ${hits}개가 정답과 같아요.` : '';
+    } else {
+      v.textContent = answer;
+      v.classList.add(answer === 'O' ? 'o' : answer === 'X' ? 'x' : 'num');
+      if (my !== undefined) me.textContent = String(my) === String(answer) ? '🎉 정답이에요!' : `내 답: ${my} · 아쉬워요!`;
+    }
   }
 
   // ---------- 질문하기 (참여자) ----------
@@ -471,13 +532,21 @@
     $$('.filters button').forEach((x) => x.classList.toggle('on', x === b));
     renderQuestions();
   }));
-  // OX 정답 공개 (발표자가 O/X 카드를 클릭)
-  $$('.ox-wrap').forEach((w) => $$('.ox-card', w).forEach((c) => (c.onclick = () => {
-    if (!isPresenter) return;
-    const n = Number(w.dataset.ox);
-    const curReveal = last && last.results[n] && last.results[n].reveal;
-    api('reveal', { slide: n, value: curReveal === c.dataset.v ? null : c.dataset.v });
-  })));
+  // 정답 확인 (퀴즈 슬라이드: 버튼, A 키, OX 카드 클릭)
+  const QUIZ = [22, 25, 27, 31, 32];
+  const revealed = () => !!(last && last.results[cur] && last.results[cur].answer != null);
+  function toggleAnswer() {
+    if (!isPresenter || !QUIZ.includes(cur)) return;
+    api('reveal', { slide: cur, on: !revealed() }).catch(() => {});
+  }
+  function updateAnsBtn() {
+    const b = $('#ansBtn');
+    b.classList.toggle('hidden', !QUIZ.includes(cur));
+    b.classList.toggle('on', revealed());
+    $('.lbl', b).textContent = revealed() ? '정답 숨기기' : '정답 확인';
+  }
+  $('#ansBtn').onclick = toggleAnswer;
+  $$('.ox-card').forEach((c) => (c.onclick = toggleAnswer));
 
   // 키보드 (리모컨 포함)
   let jump = '';
@@ -494,6 +563,7 @@
     else if (k === 'r' || k === 'R') replay();
     else if (k === 'q' || k === 'Q') $('#qrCard').classList.toggle('mini');
     else if (k === 'm' || k === 'M') $('#drawer').classList.toggle('open');
+    else if (k === 'a' || k === 'A') toggleAnswer();
     else if (k === 'Escape') { $('#modalRoot').innerHTML = ''; $('#drawer').classList.remove('open'); }
     else if (/^\d$/.test(k)) { jump = (jump + k).slice(-2); setTimeout(() => { jump = ''; }, 1500); }
   });

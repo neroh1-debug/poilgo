@@ -310,3 +310,25 @@ input, textarea { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .slide.play .a, .slide.play .draw, .slide.play .pulse, .slide.play .mark { animation-duration: .01s !important; animation-delay: 0s !important; }
 }
+
+/* ================= 정답 확인 ================= */
+.ansbtn { position: fixed; left: 18px; bottom: 74px; z-index: 40; display: flex; align-items: center; gap: 8px; border: 0; background: #ffd84f; color: #1d2b4a; font-size: 17px; font-weight: 800; padding: 12px 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); transition: transform .15s; }
+.ansbtn:hover { transform: scale(1.04); }
+.ansbtn.on { background: #fff; color: #6b7487; }
+.blank.filled { border-bottom-color: transparent; color: var(--red); text-align: center; animation: aPop .6s cubic-bezier(.2, .75, .25, 1) both !important; }
+.num-chip { transition: background .4s, color .4s, opacity .4s; }
+.num-chip.hit { background: #2b9a63; color: #fff; }
+.num-chip.miss { opacity: .35; }
+.top3.ans .t { color: #0b6b4f; }
+.top3 .c.ok { background: #2b9a63; }
+.rank li.hit { background: #e3f6ec; }
+.rank li.hit b { color: #2b9a63; }
+.panel.answered { text-align: center; }
+.ans-box { margin-top: 14px; background: #fff8dc; border-radius: 18px; padding: 18px 14px; animation: aPop .5s both; }
+.ans-k { font-size: 14px; font-weight: 800; color: #b07d00; letter-spacing: .1em; }
+.ans-v { font-size: 22px; font-weight: 800; color: var(--navy-d); margin-top: 6px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.ans-v b { color: #b07d00; margin-right: 4px; }
+.ans-v.o, .ans-v.x, .ans-v.num { font-size: 72px; line-height: 1; display: block; }
+.ans-v.o { color: var(--o); }
+.ans-v.x { color: var(--x); }
+.ans-me { margin-top: 12px; font-size: 16px; font-weight: 700; color: #4a5468; }
