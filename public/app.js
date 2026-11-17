@@ -517,6 +517,7 @@
   }
 
   // 발표자 이벤트 연결
+  $('#homeBtn').onclick = () => go(1);
   $('#prevBtn').onclick = () => go(cur - 1);
   $('#nextBtn').onclick = () => go(cur + 1);
   $('#replayBtn').onclick = replay;
