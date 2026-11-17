@@ -215,7 +215,9 @@ input, textarea { font-family: inherit; }
 .toolbar button:hover { background: rgba(255, 255, 255, .12); }
 .toolbar .pg { font-variant-numeric: tabular-nums; font-weight: 700; padding: 0 10px; min-width: 76px; text-align: center; }
 .toolbar .sep { width: 1px; height: 22px; background: rgba(255, 255, 255, .2); margin: 0 4px; }
-.toolbar .ppl { font-size: 14px; color: #b9c3d9; padding: 0 8px; }
+.toolbar .ppl { font-size: 14px; color: #b9c3d9; padding: 0 8px; white-space: nowrap; min-width: 130px; text-align: center; font-variant-numeric: tabular-nums; }
+/* 버튼이 나타나거나 사라져도 툴바 너비가 바뀌지 않도록 자리는 유지 */
+.toolbar .invisible { visibility: hidden; pointer-events: none; }
 
 .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 92vw; z-index: 60; background: #f6f8fc; box-shadow: -20px 0 50px rgba(0, 0, 0, .3); transform: translateX(105%); transition: transform .35s cubic-bezier(.2, .8, .2, 1); display: flex; flex-direction: column; }
 .drawer.open { transform: none; }

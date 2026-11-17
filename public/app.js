@@ -63,7 +63,7 @@
     if (animate) replay(); else el.classList.add('play');
     $('#pg').textContent = `${n} / ${N}`;
     $('#audPg').textContent = `${n} / ${N}`;
-    $('#resetBtn').classList.toggle('hidden', !SLIDES[n - 1].interact);
+    $('#resetBtn').classList.toggle('invisible', !SLIDES[n - 1].interact);
     updateAnsBtn();
     if (!isPresenter) renderPanel();
     // 다음 슬라이드 이미지 미리 불러오기
