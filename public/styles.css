@@ -197,7 +197,9 @@ input, textarea { font-family: inherit; }
 /* ================= 발표자 화면 ================= */
 .presenter { background: #000; }
 .presenter .stage { position: fixed; }
-.qr-card { position: fixed; right: 14px; bottom: 14px; z-index: 40; background: #fff; border-radius: 16px; padding: 10px 10px 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); text-align: center; cursor: pointer; width: 124px; transition: transform .3s; border: 2px solid #e6ebf4; }
+.qr-card { position: fixed; right: 14px; bottom: 14px; z-index: 40; background: #fff; border-radius: 16px; padding: 10px 10px 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); text-align: center; cursor: zoom-in; width: 124px; transition: transform .25s, box-shadow .25s; border: 2px solid #e6ebf4; }
+.qr-card:hover { transform: scale(1.08); box-shadow: 0 14px 36px rgba(0, 0, 0, .32); }
+.qr-card:active { transform: scale(.97); }
 .qr-card img { width: 102px; height: 102px; display: block; margin: 0 auto; }
 .qr-card .cap { font-size: 11.5px; font-weight: 800; color: var(--navy); margin-top: 6px; line-height: 1.3; }
 .qr-card.mini { width: auto; padding: 10px 14px; }
@@ -334,3 +336,5 @@ input, textarea { font-family: inherit; }
 .ans-v.o { color: var(--o); }
 .ans-v.x { color: var(--x); }
 .ans-me { margin-top: 12px; font-size: 16px; font-weight: 700; color: #4a5468; }
+.qr-card .zoom-hint { font-size: 10.5px; font-weight: 700; color: #8a94a8; }
+.qr-modal { cursor: zoom-out; }

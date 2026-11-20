@@ -503,13 +503,21 @@
     }
   }
 
+  // QR 크게 보기: 누르는 즉시 열고, 주소는 나중에 채움 (서버 응답을 기다리지 않음)
+  let joinUrlCache = '';
   function openQrBig() {
+    const root = $('#modalRoot');
+    if ($('.qr-big', root)) { root.innerHTML = ''; return; }
+    const qrSrc = $('#qrCard img').src;
+    root.innerHTML = `<div class="modal qr-modal"><div class="qr-big"><img alt="QR"><div class="u"></div><div class="s">휴대폰 카메라로 스캔해 참여하고 질문해 주세요 · 아무 곳이나 누르면 닫혀요</div></div></div>`;
+    $('.qr-big img', root).src = qrSrc;
+    const u = $('.u', root);
+    u.textContent = joinUrlCache || location.origin + '/';
+    $('.modal', root).onclick = () => { root.innerHTML = ''; };
     fetch('/api/info').then((r) => r.json()).then((info) => {
-      const root = $('#modalRoot');
-      root.innerHTML = `<div class="modal"><div class="qr-big"><img src="/qr.svg" alt="QR"><div class="u"></div><div class="s">휴대폰 카메라로 스캔해 참여하고 질문해 주세요</div></div></div>`;
-      $('.u', root).textContent = info.joinUrl;
-      $('.modal', root).onclick = () => { root.innerHTML = ''; };
-    });
+      joinUrlCache = info.joinUrl;
+      if (u.isConnected) u.textContent = info.joinUrl;
+    }).catch(() => {});
   }
 
   function toggleFs() {
